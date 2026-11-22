@@ -1,0 +1,47 @@
+# Go binaries and build outputs
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+/skilloom
+/bin/
+/dist/
+
+# Go tests and coverage
+*.test
+*.out
+*.coverprofile
+coverage.html
+coverage.txt
+coverage.xml
+profile.cov
+
+# Local Go workspaces (go.mod and go.sum stay tracked)
+go.work
+go.work.sum
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# VS Code: all local settings, workspaces, and extension artifacts
+.vscode/
+.vscode-test/
+.vscode-test-web/
+.vscode-server/
+.vscode-server-insiders/
+.vscode-remote/
+.history/
+*.code-workspace
+*.code-snippets
+*.vsix
+
+# Local project documentation
+/.docs/
+/.documents/
+
+# macOS
+.DS_Store
