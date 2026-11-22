@@ -1,0 +1,5 @@
+{
+  "name": "skilloom",
+  "version": "0.1.0",
+  "description": "Send Claude Code chat messages to Skilloom."
+}

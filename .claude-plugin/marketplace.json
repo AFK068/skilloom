@@ -1,0 +1,10 @@
+{
+  "name": "skilloom",
+  "owner": { "name": "Skilloom" },
+  "plugins": [
+    {
+      "name": "skilloom",
+      "source": "./plugins/claude"
+    }
+  ]
+}
