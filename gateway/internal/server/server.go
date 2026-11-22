@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/AFK068/skilloom/gateway/internal/config"
+	"github.com/AFK068/skilloom/gateway/internal/proxy"
 )
 
 type Server struct {
@@ -15,7 +16,21 @@ type Server struct {
 
 func New(cfg config.Config) *Server {
 	router := gin.New()
-	router.Use(gin.Recovery())
+	router.RedirectTrailingSlash = false
+	router.UseEscapedPath = true
+
+	// Register routes for each configured upstream.
+	for _, route := range cfg.Routes {
+		if len(route.Endpoints) == 0 {
+			continue
+		}
+
+		// Wrap the proxy handler with Gin to handle requests for the route's endpoints.
+		handler := gin.WrapH(proxy.New(route.Upstream, route.Prefix))
+		for _, endpoint := range route.Endpoints {
+			router.Handle(endpoint.Method, route.Prefix+endpoint.Path, handler)
+		}
+	}
 
 	return &Server{
 		router: router,
