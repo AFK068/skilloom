@@ -19,17 +19,10 @@ func New(cfg config.Config) *Server {
 	router.RedirectTrailingSlash = false
 	router.UseEscapedPath = true
 
-	// Register routes for each configured upstream.
 	for _, route := range cfg.Routes {
-		if len(route.Endpoints) == 0 {
-			continue
-		}
-
-		// Wrap the proxy handler with Gin to handle requests for the route's endpoints.
 		handler := gin.WrapH(proxy.New(route.Upstream, route.Prefix))
-		for _, endpoint := range route.Endpoints {
-			router.Handle(endpoint.Method, route.Prefix+endpoint.Path, handler)
-		}
+		router.Any(route.Prefix, handler)
+		router.Any(route.Prefix+"/*path", handler)
 	}
 
 	return &Server{

@@ -24,24 +24,18 @@ func TestServer(t *testing.T) {
 		assert.ErrorIs(t, srv.Start(), syscall.EADDRINUSE)
 	})
 
-	t.Run("configured routes", func(t *testing.T) {
+	t.Run("proxy prefixes", func(t *testing.T) {
 		t.Parallel()
 
 		upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Header().Set("X-Upstream-Request", r.Method+" "+r.URL.Path)
+			w.Header().Set("X-Upstream-Request", r.Method+" "+r.URL.RequestURI())
 			w.WriteHeader(http.StatusNoContent)
 		}))
 		defer upstream.Close()
 
 		router := New(config.Config{Routes: []config.Route{
-			{Prefix: "/openai/v1", Upstream: upstream.URL + "/v1", Endpoints: []config.Endpoint{
-				{Method: "GET", Path: "/models"},
-				{Method: "POST", Path: "/responses"},
-			}},
-			{Prefix: "/anthropic/v1", Upstream: upstream.URL + "/api", Endpoints: []config.Endpoint{
-				{Method: "POST", Path: "/messages"},
-			}},
-			{Prefix: "/disabled/v1", Upstream: upstream.URL},
+			{Prefix: "/openai/v1", Upstream: upstream.URL + "/v1"},
+			{Prefix: "/anthropic/v1", Upstream: upstream.URL + "/api"},
 		}}).router
 
 		for _, tc := range []struct {
@@ -49,15 +43,10 @@ func TestServer(t *testing.T) {
 			status       int
 			upstream     string
 		}{
-			{"GET", "/openai/v1/models", http.StatusNoContent, "GET /v1/models"},
-			{"POST", "/openai/v1/responses", http.StatusNoContent, "POST /v1/responses"},
-			{"POST", "/anthropic/v1/messages", http.StatusNoContent, "POST /api/messages"},
-			{"GET", "/openai/v1/responses", http.StatusNotFound, ""},
-			{"POST", "/openai/v1/responses/", http.StatusNotFound, ""},
-			{"POST", "/openai/v1/%72esponses", http.StatusNotFound, ""},
-			{"POST", "/openai/v1/unknown", http.StatusNotFound, ""},
-			{"POST", "/disabled/v1/responses", http.StatusNotFound, ""},
-			{"GET", "/healthz", http.StatusNotFound, ""},
+			{"GET", "/openai/v1", http.StatusNoContent, "GET /v1/"},
+			{"POST", "/openai/v1/new/path?trace=a%2Fb", http.StatusNoContent, "POST /v1/new/path?trace=a%2Fb"},
+			{"DELETE", "/anthropic/v1/files/a%2Fb", http.StatusNoContent, "DELETE /api/files/a%2Fb"},
+			{"GET", "/openai/v10/models", http.StatusNotFound, ""},
 		} {
 			w := httptest.NewRecorder()
 			router.ServeHTTP(w, httptest.NewRequestWithContext(t.Context(), tc.method, tc.path, nil))
