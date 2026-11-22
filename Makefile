@@ -1,4 +1,4 @@
-SERVICE ?= gateway
+SERVICE ?= collector
 export GOWORK := off
 
 .PHONY: test lint marketplace
