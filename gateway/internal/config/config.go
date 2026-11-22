@@ -16,7 +16,6 @@ type Route struct {
 	Upstream string `mapstructure:"upstream"`
 }
 
-// Load reads the gateway configuration from file.
 func Load(file string) (Config, error) {
 	v := viper.New()
 	v.SetConfigFile(file)
