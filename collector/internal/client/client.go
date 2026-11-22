@@ -13,9 +13,12 @@ var httpClient = resty.New().SetTimeout(3 * time.Second).SetRedirectPolicy(resty
 
 func Send(endpoint, token string, event message.Message) error {
 	response, err := httpClient.R().SetAuthToken(token).SetBody(event).Post(endpoint)
-	if err == nil && !response.IsSuccess() {
+	if err != nil {
+		return fmt.Errorf("send message to %q: %w", endpoint, err)
+	}
+	if !response.IsSuccess() {
 		return fmt.Errorf("ingest endpoint returned HTTP %d", response.StatusCode())
 	}
 
-	return err
+	return nil
 }
