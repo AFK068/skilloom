@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -15,7 +17,14 @@ type Config struct {
 	Token    string `mapstructure:"token"`
 }
 
-func Load(file string) (Config, error) {
+func Load() (Config, error) {
+	dir, err := os.UserConfigDir()
+	if err != nil {
+		return Config{}, fmt.Errorf("get user config dir: %w", err)
+	}
+
+	file := filepath.Join(dir, "skilloom", "config.json")
+
 	v := viper.New()
 	v.SetConfigFile(file)
 	if err := v.ReadInConfig(); err != nil {

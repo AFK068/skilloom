@@ -2,8 +2,6 @@ package capture
 
 import (
 	"io"
-	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/google/uuid"
@@ -21,11 +19,7 @@ func Run(agent harness.Harness, author role.Role, input io.Reader) error {
 		return err
 	}
 
-	dir, err := os.UserConfigDir()
-	if err != nil {
-		return err
-	}
-	cfg, err := config.Load(filepath.Join(dir, "skilloom", "config.json"))
+	cfg, err := config.Load()
 	if err != nil {
 		return err
 	}
