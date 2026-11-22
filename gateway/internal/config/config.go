@@ -12,14 +12,8 @@ type Config struct {
 }
 
 type Route struct {
-	Prefix    string     `mapstructure:"prefix"`
-	Upstream  string     `mapstructure:"upstream"`
-	Endpoints []Endpoint `mapstructure:"endpoints"`
-}
-
-type Endpoint struct {
-	Method string `mapstructure:"method"`
-	Path   string `mapstructure:"path"`
+	Prefix   string `mapstructure:"prefix"`
+	Upstream string `mapstructure:"upstream"`
 }
 
 func Load(file string) (Config, error) {
