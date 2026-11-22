@@ -3,32 +3,15 @@ listen: "127.0.0.1:8080"
 routes:
   - prefix: /openai/v1
     upstream: http://127.0.0.1:9000/v1
-    endpoints:
-      - method: POST
-        path: /chat/completions
-      - method: POST
-        path: /responses
 
   - prefix: /anthropic/v1
     upstream: http://127.0.0.1:9000/v1
-    endpoints:
-      - method: POST
-        path: /messages
 
   - prefix: /kimi/v1
     upstream: http://127.0.0.1:9000/v1
-    endpoints:
-      - method: POST
-        path: /chat/completions
 
   - prefix: /zai/v1
     upstream: http://127.0.0.1:9000/api/paas/v4
-    endpoints:
-      - method: POST
-        path: /chat/completions
 
   - prefix: /deepseek/v1
     upstream: http://127.0.0.1:9000
-    endpoints:
-      - method: POST
-        path: /chat/completions
