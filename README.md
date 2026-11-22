@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Turn your team’s conversations with AI into a shared library of reusable agent skills.
+  Skilloom automatically builds a shared library of reusable agent skills from your team’s conversations with AI.
 </p>
 
 <p align="center">
