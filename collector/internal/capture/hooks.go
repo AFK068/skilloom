@@ -1,10 +1,13 @@
-package agents
+package capture
 
 import (
 	"encoding/json"
 	"errors"
 	"io"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
 
 	"github.com/AFK068/skilloom/collector/internal/domain/harness"
 	"github.com/AFK068/skilloom/collector/internal/domain/message"
@@ -19,7 +22,7 @@ type hookInput struct {
 	LastAssistantMessage string `json:"last_assistant_message"`
 }
 
-func ReadHookMessage(agent harness.Harness, author role.Role, input io.Reader) (*message.Message, error) {
+func readMessage(agent harness.Harness, author role.Role, input io.Reader) (*message.Message, error) {
 	var event hookInput
 	if err := json.NewDecoder(input).Decode(&event); err != nil {
 		return nil, errors.New("could not read hook input")
@@ -42,11 +45,13 @@ func ReadHookMessage(agent harness.Harness, author role.Role, input io.Reader) (
 	}
 
 	return &message.Message{
-		Harness:   agent,
-		SessionID: event.SessionID,
-		TurnID:    event.TurnID,
-		Role:      author,
-		Text:      text,
+		EventID:    uuid.New(),
+		Harness:    agent,
+		SessionID:  event.SessionID,
+		TurnID:     event.TurnID,
+		Role:       author,
+		Text:       text,
+		CapturedAt: time.Now().UTC(),
 	}, nil
 }
 

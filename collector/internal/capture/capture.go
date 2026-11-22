@@ -1,12 +1,9 @@
 package capture
 
 import (
+	"fmt"
 	"io"
-	"time"
 
-	"github.com/google/uuid"
-
-	"github.com/AFK068/skilloom/collector/internal/agents"
 	"github.com/AFK068/skilloom/collector/internal/client"
 	"github.com/AFK068/skilloom/collector/internal/config"
 	"github.com/AFK068/skilloom/collector/internal/domain/harness"
@@ -14,17 +11,18 @@ import (
 )
 
 func Run(agent harness.Harness, author role.Role, input io.Reader) error {
-	event, err := agents.ReadHookMessage(agent, author, input)
-	if err != nil || event == nil {
-		return err
+	event, err := readMessage(agent, author, input)
+	if err != nil {
+		return fmt.Errorf("read message: %w", err)
+	}
+	if event == nil {
+		return nil
 	}
 
 	cfg, err := config.Load()
 	if err != nil {
-		return err
+		return fmt.Errorf("load config: %w", err)
 	}
 
-	event.EventID = uuid.New()
-	event.CapturedAt = time.Now().UTC()
 	return client.Send(cfg.Endpoint, cfg.Token, *event)
 }
