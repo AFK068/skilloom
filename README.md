@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  Collect user messages and assistant replies from Codex and Claude Code on macOS and send them to your Skilloom server.
+  Turn your team’s conversations with AI into a shared library of reusable agent skills.
 </p>
 
 <p align="center">
