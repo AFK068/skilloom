@@ -1,0 +1,18 @@
+listen: "127.0.0.1:8080"
+
+routes:
+  # TODO: Replace these local upstream URLs with the final provider URLs.
+  - prefix: /openai/v1
+    upstream: http://127.0.0.1:9000/v1
+
+  - prefix: /anthropic/v1
+    upstream: http://127.0.0.1:9000/v1
+
+  - prefix: /kimi/v1
+    upstream: http://127.0.0.1:9000/v1
+
+  - prefix: /zai/v1
+    upstream: http://127.0.0.1:9000/v1
+
+  - prefix: /deepseek/v1
+    upstream: http://127.0.0.1:9000/v1
