@@ -1,0 +1,15 @@
+version: 2
+project_name: skilloom
+dist: dist/collector
+
+builds:
+  - dir: collector
+    main: ./cmd/skilloom
+    targets: [darwin_amd64, darwin_arm64]
+
+universal_binaries:
+  - replace: true
+    hooks:
+      post:
+        - rsync -a --delete collector/marketplace/ dist/marketplace/
+        - sh -ec 'for plugin in dist/marketplace/plugins/*/; do install -m 755 "{{ .Path }}" "$plugin"; done'

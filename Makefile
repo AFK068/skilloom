@@ -1,7 +1,7 @@
 SERVICE ?= gateway
 export GOWORK := off
 
-.PHONY: test lint
+.PHONY: test lint marketplace
 
 test:
 	@cd "$(SERVICE)" && go test ./...
@@ -13,3 +13,6 @@ lint: bin/golangci-lint
 
 bin/golangci-lint:
 	@GOBIN="$(CURDIR)/bin" go install github.com/golangci/golangci-lint/v2/cmd/golangci-lint@v2.15.0
+
+marketplace:
+	@goreleaser build --snapshot --clean --config collector/.goreleaser.yaml
