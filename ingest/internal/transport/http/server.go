@@ -12,22 +12,41 @@ import (
 	"github.com/AFK068/skilloom/ingest/internal/config"
 )
 
+type Route interface {
+	Register(rg *gin.RouterGroup)
+}
+
+type Deps struct {
+	fx.In
+
+	Cfg    config.Config
+	Log    *zap.Logger
+	Routes []Route `group:"v1_routes"`
+}
+
 type Server struct {
+	Deps
 	srv *http.Server
 	log *zap.Logger
 }
 
-func New(cfg config.Config, log *zap.Logger) *Server {
+func New(d Deps) *Server {
 	router := gin.New()
 	router.RedirectTrailingSlash = false
 	router.Use(gin.Recovery())
 
+	v1 := router.Group("/v1")
+	for _, r := range d.Routes {
+		r.Register(v1)
+	}
+
 	return &Server{
+		Deps: d,
 		srv: &http.Server{
-			Addr:    cfg.HTTP.Addr,
+			Addr:    d.Cfg.HTTP.Addr,
 			Handler: router,
 		},
-		log: log.Named("http"),
+		log: d.Log.Named("http"),
 	}
 }
 
