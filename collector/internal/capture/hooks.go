@@ -3,6 +3,7 @@ package capture
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"strings"
 	"time"
@@ -25,7 +26,7 @@ type hookInput struct {
 func readMessage(agent harness.Harness, author role.Role, input io.Reader) (*message.Message, error) {
 	var event hookInput
 	if err := json.NewDecoder(input).Decode(&event); err != nil {
-		return nil, errors.New("could not read hook input")
+		return nil, fmt.Errorf("decode hook input: %w", err)
 	}
 
 	var text string
@@ -62,10 +63,10 @@ func isCodexComposerSuggestion(author role.Role, text string) bool {
 			"This is an app-generated request for a suggested next user message. The user did not write this message.",
 		)
 	}
-	var fields map[string]json.RawMessage
-	if err := json.Unmarshal([]byte(text), &fields); err != nil || len(fields) != 1 {
+	var payload map[string]*string
+	if err := json.Unmarshal([]byte(text), &payload); err != nil || len(payload) != 1 {
 		return false
 	}
-	var suggestion *string
-	return json.Unmarshal(fields["suggestion"], &suggestion) == nil
+	_, ok := payload["suggestion"]
+	return ok
 }
