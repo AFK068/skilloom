@@ -12,14 +12,26 @@ import (
 	"github.com/AFK068/skilloom/ingest/internal/config"
 )
 
+//go:generate go tool mockgen -source=$GOFILE -destination=mock/jetstream_mock.go -package=mock
+
 const (
 	streamName     = "INGEST"
 	streamSubjects = "ingest.>"
 )
 
+type JetStream interface {
+	CreateOrUpdateStream(ctx context.Context, cfg jetstream.StreamConfig) (jetstream.Stream, error)
+	Publish(
+		ctx context.Context,
+		subject string,
+		payload []byte,
+		opts ...jetstream.PublishOpt,
+	) (*jetstream.PubAck, error)
+}
+
 type Client struct {
 	Conn *nats.Conn
-	JS   jetstream.JetStream
+	JS   JetStream
 	log  *zap.Logger
 }
 
