@@ -19,26 +19,34 @@ type RDB interface {
 	Close() error
 }
 
-type Client struct {
-	RDB  RDB
-	addr string
-	log  *zap.Logger
+type Deps struct {
+	fx.In
+
+	Cfg config.Config
+	LC  fx.Lifecycle
+	Log *zap.Logger
 }
 
-func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) *Client {
+type Client struct {
+	Deps
+	RDB RDB
+	log *zap.Logger
+}
+
+func New(d Deps) *Client {
 	rdb := goredis.NewClient(&goredis.Options{
-		Addr:     cfg.Redis.Addr,
-		Password: cfg.Redis.Password,
-		DB:       cfg.Redis.DB,
+		Addr:     d.Cfg.Redis.Addr,
+		Password: d.Cfg.Redis.Password,
+		DB:       d.Cfg.Redis.DB,
 	})
 
 	c := &Client{
+		Deps: d,
 		RDB:  rdb,
-		addr: cfg.Redis.Addr,
-		log:  log.Named("redis"),
+		log:  d.Log.Named("redis"),
 	}
 
-	lc.Append(fx.Hook{
+	d.LC.Append(fx.Hook{
 		OnStart: c.ping,
 		OnStop:  c.close,
 	})
@@ -48,10 +56,10 @@ func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) *Client {
 
 func (c *Client) ping(ctx context.Context) error {
 	if err := c.RDB.Ping(ctx).Err(); err != nil {
-		return fmt.Errorf("ping redis %q: %w", c.addr, err)
+		return fmt.Errorf("ping redis %q: %w", c.Cfg.Redis.Addr, err)
 	}
 
-	c.log.Info("connected", zap.String("addr", c.addr))
+	c.log.Info("connected", zap.String("addr", c.Cfg.Redis.Addr))
 	return nil
 }
 
