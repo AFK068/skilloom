@@ -1,20 +1,21 @@
 package config
 
 import (
-	"errors"
 	"fmt"
-	"net"
 	"net/url"
 	"os"
 	"path/filepath"
+	"slices"
 	"strings"
 
-	"github.com/spf13/viper"
+	validation "github.com/go-ozzo/ozzo-validation/v4"
+	"github.com/go-ozzo/ozzo-validation/v4/is"
+	"github.com/ilyakaznacheev/cleanenv"
 )
 
 type Config struct {
-	Endpoint string `mapstructure:"endpoint"`
-	Token    string `mapstructure:"token"`
+	Endpoint string `json:"endpoint"`
+	Token    string `json:"token"`
 }
 
 func Load() (Config, error) {
@@ -23,34 +24,40 @@ func Load() (Config, error) {
 		return Config{}, fmt.Errorf("get user config dir: %w", err)
 	}
 
+	var cfg Config
 	file := filepath.Join(dir, "skilloom", "config.json")
-
-	v := viper.New()
-	v.SetConfigFile(file)
-	if err := v.ReadInConfig(); err != nil {
+	if err := cleanenv.ReadConfig(file, &cfg); err != nil {
 		return Config{}, fmt.Errorf("read config %q: %w", file, err)
 	}
 
-	var cfg Config
-	if err := v.Unmarshal(&cfg); err != nil {
-		return Config{}, fmt.Errorf("decode config %q: %w", file, err)
+	cfg.normalize()
+
+	if err := cfg.Validate(); err != nil {
+		return Config{}, fmt.Errorf("validate config %q: %w", file, err)
 	}
 
-	return cfg, cfg.validate()
+	return cfg, nil
 }
 
-func (cfg Config) validate() error {
-	endpoint, err := url.Parse(cfg.Endpoint)
-	if err != nil || endpoint.Hostname() == "" || strings.TrimSpace(cfg.Token) == "" {
-		return errors.New("a valid Skilloom endpoint and token are required")
-	}
+func (c *Config) normalize() {
+	c.Endpoint = strings.TrimSpace(c.Endpoint)
+	c.Token = strings.TrimSpace(c.Token)
+}
 
-	host := endpoint.Hostname()
-	local := strings.EqualFold(host, "localhost") || net.ParseIP(host).IsLoopback()
-
-	if endpoint.Scheme != "https" && (endpoint.Scheme != "http" || !local) {
-		return errors.New("use HTTPS for Skilloom endpoints outside localhost")
-	}
-
-	return nil
+func (c Config) Validate() error {
+	return validation.ValidateStruct(&c,
+		validation.Field(&c.Endpoint,
+			validation.Required,
+			is.RequestURL,
+			validation.NewStringRule(func(s string) bool {
+				u, err := url.Parse(s)
+				if err != nil || u.Hostname() == "" {
+					return false
+				}
+				return u.Scheme == "https" ||
+					(u.Scheme == "http" && slices.Contains([]string{"localhost", "127.0.0.1", "::1"}, strings.ToLower(u.Hostname())))
+			}, "must use HTTPS outside localhost"),
+		),
+		validation.Field(&c.Token, validation.Required),
+	)
 }
