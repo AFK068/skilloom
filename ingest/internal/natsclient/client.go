@@ -29,18 +29,30 @@ type JetStream interface {
 	) (*jetstream.PubAck, error)
 }
 
+type Deps struct {
+	fx.In
+
+	Cfg config.Config
+	LC  fx.Lifecycle
+	Log *zap.Logger
+}
+
 type Client struct {
+	Deps
 	Conn *nats.Conn
 	JS   JetStream
 	log  *zap.Logger
 }
 
-func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) (*Client, error) {
-	c := &Client{log: log.Named("nats")}
+func New(d Deps) (*Client, error) {
+	c := &Client{
+		Deps: d,
+		log:  d.Log.Named("nats"),
+	}
 
-	conn, err := nats.Connect(cfg.NATS.URL, c.options()...)
+	conn, err := nats.Connect(d.Cfg.NATS.URL, c.options()...)
 	if err != nil {
-		return nil, fmt.Errorf("connect to nats %q: %w", cfg.NATS.URL, err)
+		return nil, fmt.Errorf("connect to nats %q: %w", d.Cfg.NATS.URL, err)
 	}
 
 	js, err := jetstream.New(conn)
@@ -53,7 +65,7 @@ func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) (*Client, error) {
 	c.JS = js
 	c.log.Info("connected", zap.String("url", conn.ConnectedUrl()))
 
-	lc.Append(fx.Hook{
+	d.LC.Append(fx.Hook{
 		OnStart: c.ensureStream,
 		OnStop:  c.close,
 	})
