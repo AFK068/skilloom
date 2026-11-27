@@ -10,25 +10,21 @@ import (
 	"github.com/AFK068/skilloom/ingest/internal/natsclient"
 	"github.com/AFK068/skilloom/ingest/internal/store/redis"
 	httpserver "github.com/AFK068/skilloom/ingest/internal/transport/http"
+	v1 "github.com/AFK068/skilloom/ingest/internal/transport/http/v1"
 )
 
 func main() {
 	gin.SetMode(gin.ReleaseMode)
 
 	fx.New(
-		fx.Provide(
-			config.Load,
-			func() (*zap.Logger, error) { return zap.NewProduction() },
-			natsclient.New,
-			redis.New,
-			httpserver.New,
-		),
+		fx.Provide(func() (*zap.Logger, error) { return zap.NewProduction() }),
 		fx.WithLogger(func(l *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: l}
 		}),
-		fx.Invoke(
-			func(*natsclient.Client, *redis.Client) {},
-			(*httpserver.Server).Start,
-		),
+		config.Module,
+		natsclient.Module,
+		redis.Module,
+		v1.Module,
+		httpserver.Module,
 	).Run()
 }
