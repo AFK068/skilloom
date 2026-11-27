@@ -11,9 +11,18 @@ import (
 	"github.com/AFK068/skilloom/ingest/internal/config"
 )
 
+//go:generate go tool mockgen -source=$GOFILE -destination=mock/rdb_mock.go -package=mock
+
+type RDB interface {
+	Get(ctx context.Context, key string) *goredis.StringCmd
+	Ping(ctx context.Context) *goredis.StatusCmd
+	Close() error
+}
+
 type Client struct {
-	RDB *goredis.Client
-	log *zap.Logger
+	RDB  RDB
+	addr string
+	log  *zap.Logger
 }
 
 func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) *Client {
@@ -24,8 +33,9 @@ func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) *Client {
 	})
 
 	c := &Client{
-		RDB: rdb,
-		log: log.Named("redis"),
+		RDB:  rdb,
+		addr: cfg.Redis.Addr,
+		log:  log.Named("redis"),
 	}
 
 	lc.Append(fx.Hook{
@@ -38,10 +48,10 @@ func New(cfg config.Config, lc fx.Lifecycle, log *zap.Logger) *Client {
 
 func (c *Client) ping(ctx context.Context) error {
 	if err := c.RDB.Ping(ctx).Err(); err != nil {
-		return fmt.Errorf("ping redis %q: %w", c.RDB.Options().Addr, err)
+		return fmt.Errorf("ping redis %q: %w", c.addr, err)
 	}
 
-	c.log.Info("connected", zap.String("addr", c.RDB.Options().Addr))
+	c.log.Info("connected", zap.String("addr", c.addr))
 	return nil
 }
 
