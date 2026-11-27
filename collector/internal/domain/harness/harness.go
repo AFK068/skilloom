@@ -1,6 +1,6 @@
 package harness
 
-//go:generate go run github.com/abice/go-enum@v0.9.5 --file=$GOFILE --noprefix
+//go:generate go tool go-enum --file=$GOFILE --noprefix
 
 // ENUM(codex, claude)
 type Harness string
