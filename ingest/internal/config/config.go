@@ -10,10 +10,9 @@ import (
 const defaultConfigPath = "config.yaml"
 
 type Config struct {
-	HTTP     HTTPConfig     `yaml:"http"`
-	NATS     NATSConfig     `yaml:"nats"`
-	Redis    RedisConfig    `yaml:"redis"`
-	Postgres PostgresConfig `yaml:"postgres"`
+	HTTP  HTTPConfig  `yaml:"http"`
+	NATS  NATSConfig  `yaml:"nats"`
+	Redis RedisConfig `yaml:"redis"`
 }
 
 type HTTPConfig struct {
@@ -28,10 +27,6 @@ type RedisConfig struct {
 	Addr     string `yaml:"addr"     env:"REDIS_ADDR"     env-default:"127.0.0.1:6379"`
 	Password string `yaml:"password" env:"REDIS_PASSWORD"`
 	DB       int    `yaml:"db"       env:"REDIS_DB"       env-default:"0"`
-}
-
-type PostgresConfig struct {
-	DSN string `yaml:"dsn" env:"POSTGRES_DSN"`
 }
 
 func Load() (Config, error) {
