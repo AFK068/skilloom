@@ -9,10 +9,6 @@ import (
 	"github.com/AFK068/skilloom/ingest/internal/domain/message"
 )
 
-type RedisStore interface {
-	Get(ctx context.Context, key string) (string, error)
-}
-
 type Publisher interface {
 	Publish(ctx context.Context, subject, msgID string, data []byte) error
 }
@@ -20,7 +16,6 @@ type Publisher interface {
 type Deps struct {
 	fx.In
 
-	Redis     RedisStore
 	Publisher Publisher
 	Log       *zap.Logger
 }
