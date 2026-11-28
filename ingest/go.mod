@@ -6,6 +6,7 @@ tool go.uber.org/mock/mockgen
 
 require (
 	github.com/gin-gonic/gin v1.12.0
+	github.com/go-ozzo/ozzo-validation/v4 v4.5.0
 	github.com/google/uuid v1.6.0
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/nats-io/nats.go v1.56.0
