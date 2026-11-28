@@ -8,6 +8,7 @@ import (
 
 	"github.com/AFK068/skilloom/ingest/internal/config"
 	"github.com/AFK068/skilloom/ingest/internal/natsclient"
+	"github.com/AFK068/skilloom/ingest/internal/services/messages"
 	"github.com/AFK068/skilloom/ingest/internal/store/redis"
 	httpserver "github.com/AFK068/skilloom/ingest/internal/transport/http"
 	v1 "github.com/AFK068/skilloom/ingest/internal/transport/http/v1"
@@ -24,6 +25,7 @@ func main() {
 		config.Module,
 		natsclient.Module,
 		redis.Module,
+		messages.Module,
 		v1.Module,
 		httpserver.Module,
 	).Run()
