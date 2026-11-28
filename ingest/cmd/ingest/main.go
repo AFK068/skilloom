@@ -8,6 +8,7 @@ import (
 
 	"github.com/AFK068/skilloom/ingest/internal/config"
 	"github.com/AFK068/skilloom/ingest/internal/natsclient"
+	natspub "github.com/AFK068/skilloom/ingest/internal/publisher/nats"
 	"github.com/AFK068/skilloom/ingest/internal/services/auth"
 	"github.com/AFK068/skilloom/ingest/internal/services/messages"
 	"github.com/AFK068/skilloom/ingest/internal/store/redis"
@@ -27,6 +28,7 @@ func main() {
 		config.Module,
 		natsclient.Module,
 		redis.Module,
+		natspub.Module,
 		auth.Module,
 		messages.Module,
 		middleware.Module,
