@@ -6,7 +6,7 @@ HTTP ingestion service for Skilloom. It accepts conversation events from `collec
 
 The current HTTP handler validates the payload and returns `202 Accepted` after calling `SaveMessages`, which is still a stub. Redis token verification and JetStream publishing are planned.
 
-![Target request flow. The collector sends POST /v1/messages with a Bearer token. Ingest looks up token:sha256 in Redis, publishes to the NATS JetStream INGEST stream with Nats-Msg-Id, then returns 202 Accepted.](../assets/ingest-request-flow.png)
+![](../assets/ingest-request-flow.png)
 
 1. **Authenticate** — Extract the `Bearer` token, hash it with SHA-256, and resolve `(user_id, space_id)` from Redis.
 2. **Validate & Normalize** — Check the incoming payload and wrap it into a slice (`[]Message`) so single-message and future batch endpoints can share the same logic.
