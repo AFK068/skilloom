@@ -7,10 +7,13 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/AFK068/skilloom/ingest/internal/domain/message"
+	"github.com/AFK068/skilloom/ingest/internal/domain/principal"
 )
 
+//go:generate go tool mockgen -source=$GOFILE -destination=mock/publisher_mock.go -package=mock
+
 type Publisher interface {
-	Publish(ctx context.Context, subject, msgID string, data []byte) error
+	PublishMessage(ctx context.Context, p principal.Principal, msg message.Message) error
 }
 
 type Deps struct {
@@ -30,9 +33,4 @@ func New(d Deps) *Service {
 		Deps: d,
 		log:  d.Log.Named("messages service"),
 	}
-}
-
-func (s *Service) SaveMessages(_ context.Context, _ []message.Message) error {
-	s.log.Info("save messages stub")
-	return nil
 }
