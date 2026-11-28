@@ -8,10 +8,13 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/AFK068/skilloom/ingest/internal/domain/message"
+	"github.com/AFK068/skilloom/ingest/internal/domain/principal"
 )
 
+//go:generate go tool mockgen -source=$GOFILE -destination=mock/messages_mock.go -package=mock
+
 type MessagesService interface {
-	SaveMessages(ctx context.Context, msgs []message.Message) error
+	SaveMessages(ctx context.Context, p principal.Principal, msgs []message.Message) error
 }
 
 type MessagesDeps struct {
