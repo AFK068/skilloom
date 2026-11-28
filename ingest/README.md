@@ -39,5 +39,4 @@ Loaded from `config.yaml` (override path with `CONFIG_PATH`). Every setting can 
 | `redis.addr` | `REDIS_ADDR` | `127.0.0.1:6379` |
 | `redis.password` | `REDIS_PASSWORD` | `""` |
 | `redis.db` | `REDIS_DB` | `0` |
-| `postgres.dsn` | `POSTGRES_DSN` | `""` |
 
