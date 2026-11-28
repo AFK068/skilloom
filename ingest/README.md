@@ -1,23 +1,17 @@
 # Skilloom Ingest
 
-High-throughput, fault-tolerant HTTP ingestion service for Skilloom.
+HTTP ingestion service for Skilloom. It accepts conversation events from `collector` hooks.
 
-It receives AI conversation events from `collector` hooks, verifies client tokens via Redis, and buffers normalized messages in NATS JetStream so downstream workers can batch-write sessions to PostgreSQL without putting the database on the request hot path.
+## Target Request Flow
 
-## Request Flow
+The current HTTP handler validates the payload and returns `202 Accepted` after calling `SaveMessages`, which is still a stub. Redis token verification and JetStream publishing are planned.
 
-```mermaid
-flowchart LR
-    C[collector CLI] -->|POST /v1/messages + Bearer token| API[Ingest API<br/>Go / Gin]
-    API -->|GET token:sha256| R[(Redis)]
-    API -->|Publish + Nats-Msg-Id| N[(NATS JetStream<br/>INGEST stream)]
-    API -->|202 Accepted| C
-```
+![Target request flow. The collector sends POST /v1/messages with a Bearer token. Ingest looks up token:sha256 in Redis, publishes to the NATS JetStream INGEST stream with Nats-Msg-Id, then returns 202 Accepted.](../assets/ingest-request-flow.png)
 
-1. **Authenticate** — extracts the `Bearer` token, hashes it with SHA-256, and resolves `(user_id, space_id)` from Redis.
-2. **Validate & Normalize** — checks the incoming payload and wraps it into a slice (`[]Message`) so single-message and future batch endpoints share the same core logic.
-3. **Buffer Durably** — publishes to the file-backed NATS JetStream `INGEST` stream (`ingest.>`, `WorkQueuePolicy`) with `event_id` as `Nats-Msg-Id` for deduplication.
-4. **Respond Fast** — returns `202 Accepted` well within the collector's 3-second hook timeout.
+1. **Authenticate** — Extract the `Bearer` token, hash it with SHA-256, and resolve `(user_id, space_id)` from Redis.
+2. **Validate & Normalize** — Check the incoming payload and wrap it into a slice (`[]Message`) so single-message and future batch endpoints can share the same logic.
+3. **Buffer Durably** — Publish to the file-backed NATS JetStream `INGEST` stream (`ingest.>`, `WorkQueuePolicy`) with `event_id` as `Nats-Msg-Id` for deduplication.
+4. **Acknowledge** — Return `202 Accepted` after JetStream confirms the publish. The collector uses a 3-second HTTP timeout.
 
 ## Layout
 
