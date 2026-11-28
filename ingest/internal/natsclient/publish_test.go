@@ -1,4 +1,4 @@
-package natsclient
+package natsclient_test
 
 import (
 	"errors"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
 
+	"github.com/AFK068/skilloom/ingest/internal/natsclient"
 	"github.com/AFK068/skilloom/ingest/internal/natsclient/mock"
 )
 
@@ -22,7 +23,7 @@ func TestPublish(t *testing.T) {
 			Publish(t.Context(), "ingest.messages", []byte("hi"), gomock.Any()).
 			Return(&jetstream.PubAck{}, nil)
 
-		c := &Client{JS: js}
+		c := &natsclient.Client{JS: js}
 		assert.NoError(t, c.Publish(t.Context(), "ingest.messages", "id-1", []byte("hi")))
 	})
 
@@ -34,7 +35,7 @@ func TestPublish(t *testing.T) {
 			Publish(t.Context(), "ingest.messages", []byte("hi")).
 			Return(&jetstream.PubAck{}, nil)
 
-		c := &Client{JS: js}
+		c := &natsclient.Client{JS: js}
 		assert.NoError(t, c.Publish(t.Context(), "ingest.messages", "", []byte("hi")))
 	})
 
@@ -47,7 +48,7 @@ func TestPublish(t *testing.T) {
 			Publish(t.Context(), "ingest.messages", []byte("hi"), gomock.Any()).
 			Return(nil, wantErr)
 
-		c := &Client{JS: js}
+		c := &natsclient.Client{JS: js}
 		assert.ErrorIs(t, c.Publish(t.Context(), "ingest.messages", "id-1", []byte("hi")), wantErr)
 	})
 }
