@@ -22,7 +22,7 @@ type MessagesHandler struct {
 func NewMessagesHandler(d MessagesDeps) *MessagesHandler {
 	return &MessagesHandler{
 		MessagesDeps: d,
-		log:          d.Log.Named("messages"),
+		log:          d.Log.Named("messages http handler"),
 	}
 }
 
