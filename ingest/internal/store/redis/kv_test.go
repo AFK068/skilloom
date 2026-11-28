@@ -1,4 +1,4 @@
-package redis
+package redis_test
 
 import (
 	"errors"
@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 
+	"github.com/AFK068/skilloom/ingest/internal/store/redis"
 	"github.com/AFK068/skilloom/ingest/internal/store/redis/mock"
 )
 
@@ -23,7 +24,7 @@ func TestGet(t *testing.T) {
 			Get(t.Context(), "k").
 			Return(goredis.NewStringResult("v", nil))
 
-		c := &Client{RDB: rdb}
+		c := &redis.Client{RDB: rdb}
 		got, err := c.Get(t.Context(), "k")
 		require.NoError(t, err)
 		assert.Equal(t, "v", got)
@@ -37,9 +38,9 @@ func TestGet(t *testing.T) {
 			Get(t.Context(), "k").
 			Return(goredis.NewStringResult("", goredis.Nil))
 
-		c := &Client{RDB: rdb}
+		c := &redis.Client{RDB: rdb}
 		got, err := c.Get(t.Context(), "k")
-		require.ErrorIs(t, err, ErrNotFound)
+		require.ErrorIs(t, err, redis.ErrNotFound)
 		assert.Empty(t, got)
 	})
 
@@ -52,7 +53,7 @@ func TestGet(t *testing.T) {
 			Get(t.Context(), "k").
 			Return(goredis.NewStringResult("", wantErr))
 
-		c := &Client{RDB: rdb}
+		c := &redis.Client{RDB: rdb}
 		got, err := c.Get(t.Context(), "k")
 		require.ErrorIs(t, err, wantErr)
 		assert.Empty(t, got)
