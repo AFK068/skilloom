@@ -5,6 +5,8 @@ import (
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+
+	"github.com/AFK068/skilloom/ingest/internal/domain/message"
 )
 
 type RedisStore interface {
@@ -35,7 +37,7 @@ func New(d Deps) *Service {
 	}
 }
 
-func (s *Service) SaveMessages(_ context.Context) error {
+func (s *Service) SaveMessages(_ context.Context, _ []message.Message) error {
 	s.log.Info("save messages stub")
 	return nil
 }
